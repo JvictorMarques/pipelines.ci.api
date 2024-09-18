@@ -4,19 +4,23 @@ on:
     branches:
       - main
   workflow_dispatch:
+    
 
 jobs:
   build:
     name: "Build and Push"
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [ 14, 16, 18 ]
 
     steps:
       - uses: actions/checkout@v4
       
-      - name: Setup Node.js environment
+      - name: Setup Node Version > ${{ matrix.node }}
         uses: actions/setup-node@v4
         with:                          # Corrigido o alinhamento do "with"
-          node-version: 20
+          node-version: ${{ matrix.node }}
           cache: 'yarn'
 
       - run: yarn
