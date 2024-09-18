@@ -1,0 +1,37 @@
+# version: '3.9' Não é necessário colocar a versão porém é uma boa pratica.
+
+services:
+  mysql:
+    container_name: "database"
+    image: mysql:8
+    ports:
+      - 3306:3306
+    volumes:
+      - db:var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=my-db
+      - MYSQL_USER=admin
+      - MYSQL_PASSWORD=root
+    networks:
+      - api-network
+
+  api:
+    container_name: "api"
+    build:
+      context: .
+    ports:
+      - 3001:3000
+    depends_on:
+      - mysql
+    networks:
+      - api-network
+
+networks:
+  api-network:
+    name: api-network
+    external: true
+    driver: bridge
+
+volumes:
+  db:
