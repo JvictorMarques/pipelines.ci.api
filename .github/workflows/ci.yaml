@@ -15,8 +15,9 @@ jobs:
       
       - name: Setup Node.js environment
         uses: actions/setup-node@v4
-      with:
-        node-version: 20
-        cache: 'yarn'
+        with:                          # Corrigido o alinhamento do "with"
+          node-version: 20
+          cache: 'yarn'
+
       - run: yarn
       - run: yarn run test
