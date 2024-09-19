@@ -24,6 +24,12 @@ jobs:
 
       - run: yarn
       - run: yarn run test
+      
+      - name: Generate TAG
+        id: generate_tag
+        run: |
+          SHA=$(echo $GITHUB_SHA | head -c7)
+          echo "sha=$SHA" >> $GITHUB_OUTPUT
 
       - name: Build docker image
-        run: docker build -t jv-api:latest .
+        run: docker build -t jv-api:${{ steps.generate_tag.outputs }} .
