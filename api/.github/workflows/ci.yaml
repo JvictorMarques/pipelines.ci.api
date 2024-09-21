@@ -1,0 +1,71 @@
+name: CI
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: "Build and Push"
+    runs-on: ubuntu-latest
+    # strategy:
+    #   matrix:
+    #     node: [16, 18, 20]
+
+    steps:
+      - uses: actions/checkout@v4
+      # - name: Setup Node Version | ${{ matrix.node }}
+      - name: Setup Node Version
+        uses: actions/setup-node@v4
+        with:
+          # node-version: ${{ matrix.node }}
+          node-version: 20
+          cache: 'yarn'
+
+      - run: yarn
+      - run: yarn run test
+      
+      - name: Generate TAG
+        id: generate_tag
+        run: |
+          SHA=$(echo $GITHUB_SHA | head -c7)
+          echo "sha=$SHA" >> $GITHUB_OUTPUT
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-east-1
+          role-to-assume: ${{ secrets.AWS_ROLE }}
+          audience: sts.amazonaws.com.cn
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, tag, and push docker image to Amazon ECR
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: my-ecr-repo
+          IMAGE_TAG: ${{ steps.generate_tag.outputs.sha }}
+        run: |
+          docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+
+      # - name: Login to Docker Hub
+      #   uses: docker/login-action@v3
+      #   with:
+      #     username: ${{ vars.DOCKERHUB_USERNAME }}
+      #     password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # - name: Build and push Docker image
+      #   uses: docker/build-push-action@v6
+      #   with:
+      #     push: true
+      #     tags: ${{ vars.DOCKERHUB_USERNAME }}/jv-api:${{ steps.generate_tag.outputs.sha }}, ${{ vars.DOCKERHUB_USERNAME }}/jv-api:latest
+
+      # - name: Build Docker image manually
+      #   run: docker build -t ${{ vars.DOCKERHUB_USERNAME }}/jv-api:${{ steps.generate_tag.outputs.sha }} .
+
+      # - name: Push Docker image to registry manually
+      #   run: docker push ${{ vars.DOCKERHUB_USERNAME }}/jv-api:${{ steps.generate_tag.outputs.sha }}
