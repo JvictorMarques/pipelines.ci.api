@@ -47,14 +47,25 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      # - name: Build, tag, and push docker image to Amazon ECR
-      #   env:
-      #     REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-      #     REPOSITORY: my-ecr-repo
-      #     IMAGE_TAG: ${{ steps.generate_tag.outputs.sha }}
-      #   run: |
-      #     docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
-      #     docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+      - name: Build and Push Docker image
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          TAG: ${{ steps.generate_tag.outputs.sha }}
+        run: |
+          docker build -t $REGISTRY/jv-ci:$TAG .
+          docker push $REGISTRY/jv-ci:$TAG
+          
+        # - name: Build, tag, and push docker image to Amazon ECR
+        #   env:
+        #     REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        #     REPOSITORY: my-ecr-repo
+        #     IMAGE_TAG: ${{ steps.generate_tag.outputs.sha }}
+        #   run: |
+        #     docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+        #     docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+
+
+        #   -=-=-=-=-=-=-=-=-=-=- DockerHUB -=-=-=-=-=-=-=-=-=-=-=-=-=-
 
       # - name: Login to Docker Hub
       #   uses: docker/login-action@v3
@@ -64,12 +75,15 @@ jobs:
 
       # - name: Build and push Docker image
       #   uses: docker/build-push-action@v6
+      #   env:
+      #     TAG: ${{ steps.generate_tag.outputs.sha }}
       #   with:
       #     push: true
-      #     tags: ${{ vars.DOCKERHUB_USERNAME }}/jv-api:${{ steps.generate_tag.outputs.sha }}, ${{ vars.DOCKERHUB_USERNAME }}/jv-api:latest
+      #     tags: ${{ vars.DOCKERHUB_USERNAME }}/jv-api:$TAG, ${{ vars.DOCKERHUB_USERNAME }}/jv-api:latest
 
       # - name: Build Docker image manually
-      #   run: docker build -t ${{ vars.DOCKERHUB_USERNAME }}/jv-api:${{ steps.generate_tag.outputs.sha }} .
-
-      # - name: Push Docker image to registry manually
-      #   run: docker push ${{ vars.DOCKERHUB_USERNAME }}/jv-api:${{ steps.generate_tag.outputs.sha }}
+      #   env:
+      #     TAG: ${{ steps.generate_tag.outputs.sha }}          
+      #   run: |
+      #     docker build -t ${{ vars.DOCKERHUB_USERNAME }}/jv-api:$TAG .
+      #     run: docker push ${{ vars.DOCKERHUB_USERNAME }}/jv-api:$TAG
