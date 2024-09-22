@@ -55,10 +55,13 @@ jobs:
         run: |
           docker build -t $REGISTRY/jv-ci:$TAG .
           docker push $REGISTRY/jv-ci:$TAG
+          docker tag $REGISTRY/jv-ci:$TAG REGISTRY/jv-ci:latest
+          docker push $REGISTRY/jv-ci:latest          docker push $REGISTRY/jv-ci:$TAG
           IMAGE=$(echo $REGISTRY/jv-ci:$TAG)
           echo "image=$IMAGE" >> $GITHUB_OUTPUT
 
       - name: Deploy to App Runner
+        id: deploy-app-runner
         uses: awslabs/amazon-app-runner-deploy@main
         with:
           service: jv-api
@@ -68,6 +71,10 @@ jobs:
           cpu: 2
           memory: 4
           port: 3000
+          wait-for-service-stability-seconds: 180
+
+      - name: App Runner check
+        run: echo "App Runner running... ${{ steps.deploy-app-runner.outputs.service-url }}"
 
         # - name: Build, tag, and push docker image to Amazon ECR
         #   env:
