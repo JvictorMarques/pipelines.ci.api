@@ -1,5 +1,5 @@
 resource "aws_ecr_repository" "jv-ci-api" {
-  name = "jv-ci"
+  name                 = "jv-ci"
   image_tag_mutability = "MUTABLE"
 
   image_scanning_configuration {

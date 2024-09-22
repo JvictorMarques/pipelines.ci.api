@@ -17,16 +17,16 @@ resource "aws_iam_role" "ecr_role" {
 
   assume_role_policy = jsonencode(
     {
-      "Version" : "2012-10-17",
-      "Statement" : [
+      Version : "2012-10-17",
+      Statement : [
         {
-          "Effect" : "Allow",
-          "Action" : "sts:AssumeRoleWithWebIdentity",
-          "Principal" : {
+          Effect : "Allow",
+          Action : "sts:AssumeRoleWithWebIdentity",
+          Principal : {
             "Federated" : "arn:aws:iam::864981720117:oidc-provider/token.actions.githubusercontent.com"
           },
-          "Condition" : {
-            "StringEquals" : {
+          Condition : {
+            StringEquals : {
               "token.actions.githubusercontent.com:aud" : [
                 "sts.amazonaws.com.cn"
               ],
@@ -60,10 +60,50 @@ resource "aws_iam_role" "ecr_role" {
           Effect   = "Allow"
           Resource = "*"
         },
+        {
+          Sid = "Statement2"
+          Action = [
+            "apprunner:*"
+          ]
+          Effect   = "Allow"
+          Resource = "*"
+        },
+        {
+          Sid = "Statement3"
+          Action = [
+            "iam:PassRole",
+            "iam:CreateServiceLinkedRole"
+          ]
+          Effect   = "Allow"
+          Resource = "*"
+        },
       ]
     })
   }
 
+  tags = {
+    IAC = "True"
+  }
+}
+resource "aws_iam_role" "app-runner-role-policy" {
+  name = "app-runner-role-policy"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Principal = {
+          Service = "build.apprunner.amazonaws.com"
+        },
+        Action = "sts:AssumeRole"
+      }
+    ]
+  })
+
+  managed_policy_arns = [
+    "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+  ]
   tags = {
     IAC = "True"
   }
