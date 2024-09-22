@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/JvictorMarques/pipelines.ci.api/compare/v1.0.0...v1.1.0) (2024-09-22)
+
+
+### Features
+
+* Allow CI workflow to interact with issues and PRs ([c1a178a](https://github.com/JvictorMarques/pipelines.ci.api/commit/c1a178a259ecb6e6fd9cc83a509c359609ac36d3))
+
 # 1.0.0 (2024-09-22)
 
 
